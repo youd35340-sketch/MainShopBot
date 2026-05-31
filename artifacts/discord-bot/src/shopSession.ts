@@ -16,7 +16,7 @@ import {
 } from "discord.js";
 import { getConfig, Product } from "./database.js";
 
-const PRODUCTS_PER_PAGE = 4;
+const PRODUCTS_PER_PAGE = 8;
 
 export function buildShopEmbed(
   products: Product[],

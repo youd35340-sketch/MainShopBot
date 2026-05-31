@@ -21,6 +21,7 @@ import * as listproducts from "./commands/listproducts.js";
 import * as postshop from "./commands/postshop.js";
 import * as setstock from "./commands/setstock.js";
 import * as stockcheck from "./commands/stockcheck.js";
+import * as announce from "./commands/announce.js";
 import { buildShopEmbed, buildComponents, runShopSession } from "./shopSession.js";
 import { getProducts, getCategories, getConfig } from "./database.js";
 
@@ -45,7 +46,7 @@ const commands: Command[] = [
   addproduct, removeproduct, editproduct,
   addcategory, removecategory, setticket,
   shop, listproducts, postshop,
-  setstock, stockcheck,
+  setstock, stockcheck, announce,
 ];
 
 const commandMap = new Collection<string, Command>();
