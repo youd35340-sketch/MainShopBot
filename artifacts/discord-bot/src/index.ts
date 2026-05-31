@@ -19,6 +19,8 @@ import * as setticket from "./commands/setticket.js";
 import * as shop from "./commands/shop.js";
 import * as listproducts from "./commands/listproducts.js";
 import * as postshop from "./commands/postshop.js";
+import * as setstock from "./commands/setstock.js";
+import * as stockcheck from "./commands/stockcheck.js";
 import {
   buildShopEmbed,
   buildComponents,
@@ -52,6 +54,8 @@ const commands: Command[] = [
   shop,
   listproducts,
   postshop,
+  setstock,
+  stockcheck,
 ];
 
 const commandMap = new Collection<string, Command>();
