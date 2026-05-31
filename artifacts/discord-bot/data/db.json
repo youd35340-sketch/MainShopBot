@@ -25,7 +25,10 @@
   "config": {
     "1505065564643659876": {
       "ticketChannelId": "1505189216814891248",
-      "ticketMessage": "Order Request"
+      "ticketMessage": "Order Request",
+      "ticketCategoryId": "1506060809946792067",
+      "staffRoleId": "1505067256126898256",
+      "welcomeMessage": "Thanks for Ordering with us! Vix will be with you shortly!!"
     }
   }
 }

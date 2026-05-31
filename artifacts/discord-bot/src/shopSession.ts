@@ -8,14 +8,13 @@ import {
   ComponentType,
   ButtonInteraction,
   StringSelectMenuInteraction,
-  MessageFlags,
   InteractionResponse,
   Message,
   ChannelType,
   PermissionFlagsBits,
   OverwriteType,
 } from "discord.js";
-import { getProducts, getCategories, getConfig, Product } from "./database.js";
+import { getConfig, Product } from "./database.js";
 
 const PRODUCTS_PER_PAGE = 4;
 
@@ -23,17 +22,17 @@ export function buildShopEmbed(
   products: Product[],
   page: number,
   totalPages: number,
-  categoryName: string,
-  categoryEmoji: string
+  displayName: string,
+  displayEmoji: string
 ): EmbedBuilder {
   const start = page * PRODUCTS_PER_PAGE;
   const pageProducts = products.slice(start, start + PRODUCTS_PER_PAGE);
 
   const embed = new EmbedBuilder()
     .setColor(0x5865f2)
-    .setTitle(`${categoryEmoji} ${categoryName} — Shop`)
+    .setTitle(`${displayEmoji}  ${displayName}`)
     .setDescription(
-      `> Browse our **${categoryName}** products below.\n> Select an item and press **🛒 Order** to purchase.\n\u200b`
+      `> Browse our products below.\n> Select an item then press **🛒 Order** to purchase.\n\u200b`
     )
     .setFooter({
       text: `Page ${page + 1} of ${totalPages} • ${products.length} product${products.length !== 1 ? "s" : ""}`,
@@ -56,7 +55,7 @@ export function buildShopEmbed(
         : `✅ ${product.stock} in stock`;
 
     embed.addFields({
-      name: `${product.emoji}  ${product.name}`,
+      name: `${product.emoji}  ${product.name}  ·  \`${product.category}\``,
       value: `${product.description}\n\n💰 **Price:** \`${product.price}\`   ${stockDisplay}\n\u200b`,
       inline: false,
     });
@@ -132,49 +131,31 @@ export function buildComponents(
   return components;
 }
 
+/**
+ * Run a full interactive shop session for a single user.
+ * Products are passed in directly — filter/sort before calling.
+ */
 export async function runShopSession(
   guildId: string,
-  guildName: string,
-  categoryName: string,
+  products: Product[],
+  displayName: string,
+  displayEmoji: string,
   reply: Message | InteractionResponse,
   updateFn: (data: { embeds: EmbedBuilder[]; components: any[] }) => Promise<void>,
-  replyEphemeralFn: (data: { embeds?: EmbedBuilder[]; content?: string; ephemeral: true }) => Promise<void>,
-  userId: string,
-  isPublic: boolean
+  userId: string
 ) {
-  const categories = getCategories(guildId);
-  const allProducts = getProducts(guildId);
-
-  const catInfo = categories.find(
-    (c) => c.name.toLowerCase() === categoryName.toLowerCase()
-  );
-  const categoryEmoji = catInfo?.emoji ?? "🛒";
-  const resolvedName = catInfo?.name ?? categoryName;
-
-  const filteredProducts = allProducts.filter(
-    (p) => p.category.toLowerCase() === categoryName.toLowerCase()
-  );
-
   let page = 0;
   let selectedProductId: string | null = null;
-  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE));
+  const totalPages = Math.max(1, Math.ceil(products.length / PRODUCTS_PER_PAGE));
   const getPageProducts = (p: number) =>
-    filteredProducts.slice(p * PRODUCTS_PER_PAGE, (p + 1) * PRODUCTS_PER_PAGE);
+    products.slice(p * PRODUCTS_PER_PAGE, (p + 1) * PRODUCTS_PER_PAGE);
 
   const collector = reply.createMessageComponentCollector({ time: 5 * 60 * 1000 });
 
   collector.on("collect", async (i: ButtonInteraction | StringSelectMenuInteraction) => {
-    if (!isPublic && i.user.id !== userId) {
+    if (i.user.id !== userId) {
       await i.reply({
-        content: "❌ This shop session belongs to someone else. Use `/shop` to open your own.",
-        ephemeral: true,
-      });
-      return;
-    }
-
-    if (isPublic && i.user.id !== userId) {
-      await i.reply({
-        content: "❌ This shop session was opened by someone else. Click a category button to start your own session.",
+        content: "❌ This session belongs to someone else. Use `/shop` to open your own.",
         ephemeral: true,
       });
       return;
@@ -184,7 +165,7 @@ export async function runShopSession(
       selectedProductId = i.values[0];
       const pageProds = getPageProducts(page);
       await i.update({
-        embeds: [buildShopEmbed(filteredProducts, page, totalPages, resolvedName, categoryEmoji)],
+        embeds: [buildShopEmbed(products, page, totalPages, displayName, displayEmoji)],
         components: buildComponents(pageProds, page, totalPages, selectedProductId),
       });
       return;
@@ -198,7 +179,7 @@ export async function runShopSession(
         selectedProductId = null;
         const pageProds = getPageProducts(page);
         await i.update({
-          embeds: [buildShopEmbed(filteredProducts, page, totalPages, resolvedName, categoryEmoji)],
+          embeds: [buildShopEmbed(products, page, totalPages, displayName, displayEmoji)],
           components: buildComponents(pageProds, page, totalPages, selectedProductId),
         });
         return;
@@ -209,7 +190,7 @@ export async function runShopSession(
         selectedProductId = null;
         const pageProds = getPageProducts(page);
         await i.update({
-          embeds: [buildShopEmbed(filteredProducts, page, totalPages, resolvedName, categoryEmoji)],
+          embeds: [buildShopEmbed(products, page, totalPages, displayName, displayEmoji)],
           components: buildComponents(pageProds, page, totalPages, selectedProductId),
         });
         return;
@@ -217,18 +198,16 @@ export async function runShopSession(
 
       if (id.startsWith("shop_order_")) {
         const productId = id.replace("shop_order_", "");
-        const product = filteredProducts.find((p) => p.id === productId);
+        const product = products.find((p) => p.id === productId);
         if (!product) {
           await i.reply({ content: "❌ Product not found.", ephemeral: true });
           return;
         }
 
         const config = getConfig(guildId);
-
         if (!config.ticketCategoryId || !config.staffRoleId) {
           await i.reply({
-            content:
-              "❌ The ticket system isn't set up yet. Ask an admin to run `/setticket`.",
+            content: "❌ The ticket system isn't set up yet. Ask an admin to run `/setticket`.",
             ephemeral: true,
           });
           return;
@@ -238,8 +217,7 @@ export async function runShopSession(
         const category = guild.channels.cache.get(config.ticketCategoryId);
         if (!category || category.type !== ChannelType.GuildCategory) {
           await i.reply({
-            content:
-              "❌ The configured ticket category is invalid. Ask an admin to re-run `/setticket`.",
+            content: "❌ The configured ticket category is invalid. Ask an admin to re-run `/setticket`.",
             ephemeral: true,
           });
           return;
@@ -251,10 +229,9 @@ export async function runShopSession(
           .toLowerCase()
           .replace(/[^a-z0-9]/g, "")
           .slice(0, 16) || "user";
-        const channelName = `order-${safeName}`;
 
         const ticketChannel = await guild.channels.create({
-          name: channelName,
+          name: `order-${safeName}`,
           type: ChannelType.GuildText,
           parent: config.ticketCategoryId,
           permissionOverwrites: [
@@ -287,7 +264,10 @@ export async function runShopSession(
           ],
         });
 
-        const welcomeText = (config.welcomeMessage ?? "Hey {user}! 👋 A staff member will be with you shortly for **{product}**.")
+        const welcomeText = (
+          config.welcomeMessage ??
+          "Hey {user}! 👋 A staff member will be with you shortly for **{product}**."
+        )
           .replace("{user}", `<@${i.user.id}>`)
           .replace("{product}", product.name);
 
@@ -307,7 +287,7 @@ export async function runShopSession(
                   : `\`${product.stock}\` remaining`,
               inline: true,
             },
-            { name: "👤 Customer", value: `<@${i.user.id}> (\`${i.user.tag}\`)`, inline: true },
+            { name: "👤 Customer", value: `<@${i.user.id}> (\`${i.user.tag}\`)`, inline: true }
           )
           .setFooter({ text: "Staff — use the button below to close this ticket when done" })
           .setTimestamp();
@@ -352,7 +332,7 @@ export async function runShopSession(
         return row;
       });
       await updateFn({
-        embeds: [buildShopEmbed(filteredProducts, page, totalPages, resolvedName, categoryEmoji)],
+        embeds: [buildShopEmbed(products, page, totalPages, displayName, displayEmoji)],
         components: disabled,
       });
     } catch {}

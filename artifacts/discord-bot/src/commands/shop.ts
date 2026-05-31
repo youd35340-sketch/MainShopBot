@@ -3,11 +3,7 @@ import {
   SlashCommandBuilder,
 } from "discord.js";
 import { getProducts, getCategories } from "../database.js";
-import {
-  buildShopEmbed,
-  buildComponents,
-  runShopSession,
-} from "../shopSession.js";
+import { buildShopEmbed, buildComponents, runShopSession } from "../shopSession.js";
 
 export const data = new SlashCommandBuilder()
   .setName("shop")
@@ -30,50 +26,38 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  let selectedCategory = interaction.options.getString("category");
+  const categoryFilter = interaction.options.getString("category");
 
-  if (!selectedCategory && categories.length > 0) {
-    selectedCategory = categories[0].name;
-  } else if (!selectedCategory) {
-    selectedCategory = [...new Set(allProducts.map((p) => p.category))][0] ?? "General";
-  }
+  let products = categoryFilter
+    ? allProducts.filter((p) => p.category.toLowerCase() === categoryFilter.toLowerCase())
+    : allProducts;
 
-  const catInfo = categories.find(
-    (c) => c.name.toLowerCase() === selectedCategory!.toLowerCase()
-  );
-  const categoryEmoji = catInfo?.emoji ?? "🛒";
-  const categoryName = catInfo?.name ?? selectedCategory!;
+  if (products.length === 0) products = allProducts;
 
-  let filteredProducts = allProducts.filter(
-    (p) => p.category.toLowerCase() === selectedCategory!.toLowerCase()
-  );
+  const displayEmoji = categoryFilter
+    ? (categories.find((c) => c.name.toLowerCase() === categoryFilter.toLowerCase())?.emoji ?? "🛒")
+    : "🛍️";
+  const displayName = categoryFilter
+    ? (categories.find((c) => c.name.toLowerCase() === categoryFilter.toLowerCase())?.name ?? categoryFilter)
+    : guildName;
 
-  if (filteredProducts.length === 0) {
-    filteredProducts = allProducts;
-    selectedCategory = [...new Set(allProducts.map((p) => p.category))][0];
-  }
-
-  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / 4));
-  const pageProds = filteredProducts.slice(0, 4);
+  const totalPages = Math.max(1, Math.ceil(products.length / 4));
+  const pageProds = products.slice(0, 4);
 
   const reply = await interaction.reply({
-    embeds: [buildShopEmbed(filteredProducts, 0, totalPages, categoryName, categoryEmoji)],
+    embeds: [buildShopEmbed(products, 0, totalPages, displayName, displayEmoji)],
     components: buildComponents(pageProds, 0, totalPages, null),
+    ephemeral: true,
     fetchReply: true,
   });
 
   await runShopSession(
     guildId,
-    guildName,
-    selectedCategory!,
+    products,
+    displayName,
+    displayEmoji,
     reply,
-    async (data) => {
-      await interaction.editReply(data as any);
-    },
-    async (data) => {
-      await interaction.followUp({ ...data } as any);
-    },
-    interaction.user.id,
-    false
+    async (data) => { await interaction.editReply(data as any); },
+    interaction.user.id
   );
 }

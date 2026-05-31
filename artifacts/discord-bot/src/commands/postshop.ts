@@ -6,13 +6,15 @@ import {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
-  ChannelType,
 } from "discord.js";
 import { getCategories, getProducts } from "../database.js";
+import { buildShopEmbed } from "../shopSession.js";
+
+const PRODUCTS_PER_PAGE = 4;
 
 export const data = new SlashCommandBuilder()
   .setName("postshop")
-  .setDescription("Post the interactive shop to a channel for everyone to use")
+  .setDescription("Post the shop directly to a channel so everyone can see and use it")
   .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
   .addStringOption((o) =>
     o
@@ -23,7 +25,7 @@ export const data = new SlashCommandBuilder()
   .addStringOption((o) =>
     o
       .setName("title")
-      .setDescription("Shop title shown at the top (default: 🛍️ Welcome to the Shop)")
+      .setDescription("Custom shop title (default: your server name)")
       .setRequired(false)
   )
   .addStringOption((o) =>
@@ -35,25 +37,19 @@ export const data = new SlashCommandBuilder()
   .addStringOption((o) =>
     o
       .setName("color")
-      .setDescription("Embed border color as a hex code (e.g. #5865F2 or FF0000)")
+      .setDescription("Embed border color as a hex code (e.g. #5865F2)")
       .setRequired(false)
   )
   .addStringOption((o) =>
     o
       .setName("thumbnail")
-      .setDescription("Image URL shown in the top-right corner of the embed (e.g. your logo)")
+      .setDescription("Image URL for the top-right corner (e.g. your logo)")
       .setRequired(false)
   )
   .addStringOption((o) =>
     o
       .setName("banner")
-      .setDescription("Image URL shown as a large banner at the bottom of the embed")
-      .setRequired(false)
-  )
-  .addStringOption((o) =>
-    o
-      .setName("footer")
-      .setDescription("Custom footer text (default: 'Click a category below to start browsing')")
+      .setDescription("Image URL shown as a large banner at the bottom")
       .setRequired(false)
   );
 
@@ -65,22 +61,17 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .trim()
     .replace(/[<#>]/g, "");
 
-  const title =
-    interaction.options.getString("title") ?? `🛍️  Welcome to ${guildName}`;
+  const title = interaction.options.getString("title") ?? `🛍️  ${guildName}`;
   const description =
     interaction.options.getString("description") ??
-    "We offer a variety of products and services at the best prices.\nBrowse our categories below and click **Order** to make a purchase!";
+    "Browse our products below. When you're ready to buy, press **🛍️ Browse & Order** to open your own interactive shop session.";
   const colorRaw = interaction.options.getString("color");
   const thumbnail = interaction.options.getString("thumbnail");
   const banner = interaction.options.getString("banner");
-  const footerText =
-    interaction.options.getString("footer") ??
-    "⬇️  Select a category to browse products and place your order";
 
   let color: number = 0x5865f2;
   if (colorRaw) {
-    const hex = colorRaw.replace(/^#/, "");
-    const parsed = parseInt(hex, 16);
+    const parsed = parseInt(colorRaw.replace(/^#/, ""), 16);
     if (!isNaN(parsed)) color = parsed;
   }
 
@@ -93,103 +84,61 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  const categories = getCategories(guildId);
   const allProducts = getProducts(guildId);
-
   if (allProducts.length === 0) {
     await interaction.reply({
-      content:
-        "❌ The shop has no products yet. Add some with `/addproduct` first.",
+      content: "❌ No products in the shop yet. Add some with `/addproduct` first.",
       ephemeral: true,
     });
     return;
   }
 
-  const uniqueCats =
-    categories.length > 0
-      ? categories
-      : [...new Set(allProducts.map((p) => p.category))].map((name) => ({
-          id: name,
-          name,
-          emoji: "📦",
-        }));
+  const categories = getCategories(guildId);
+  const totalPages = Math.max(1, Math.ceil(allProducts.length / PRODUCTS_PER_PAGE));
 
   const totalInStock = allProducts.filter(
-    (p) =>
-      p.stock === "unlimited" ||
-      (typeof p.stock === "number" && p.stock > 0)
+    (p) => p.stock === "unlimited" || (typeof p.stock === "number" && p.stock > 0)
   ).length;
-  const totalProducts = allProducts.length;
 
-  const embed = new EmbedBuilder()
+  const uniqueCats = categories.length > 0
+    ? categories
+    : [...new Set(allProducts.map((p) => p.category))].map((name) => ({ id: name, name, emoji: "📦" }));
+
+  const headerEmbed = new EmbedBuilder()
     .setColor(color)
     .setTitle(title)
     .setDescription(
       [
         description,
         "",
-        `> 📦 **${totalProducts}** product${totalProducts !== 1 ? "s" : ""} available  •  ✅ **${totalInStock}** in stock  •  🗂️ **${uniqueCats.length}** categor${uniqueCats.length !== 1 ? "ies" : "y"}`,
+        `> 📦 **${allProducts.length}** products  •  ✅ **${totalInStock}** in stock  •  🗂️ **${uniqueCats.length}** categor${uniqueCats.length !== 1 ? "ies" : "y"}`,
         "",
         "─────────────────────────────",
+        `**Categories:** ${uniqueCats.map((c) => `${c.emoji} ${c.name}`).join("  ·  ")}`,
       ].join("\n")
     )
-    .setFooter({ text: footerText })
+    .setFooter({ text: `Showing all ${allProducts.length} products • Page 1 of ${totalPages}` })
     .setTimestamp();
 
-  if (thumbnail) embed.setThumbnail(thumbnail);
-  if (banner) embed.setImage(banner);
+  if (thumbnail) headerEmbed.setThumbnail(thumbnail);
+  if (banner) headerEmbed.setImage(banner);
 
-  for (const cat of uniqueCats) {
-    const catProducts = allProducts.filter(
-      (p) => p.category.toLowerCase() === cat.name.toLowerCase()
-    );
-    const inStock = catProducts.filter(
-      (p) =>
-        p.stock === "unlimited" ||
-        (typeof p.stock === "number" && p.stock > 0)
-    ).length;
-    const outOfStock = catProducts.length - inStock;
+  const productEmbed = buildShopEmbed(allProducts, 0, totalPages, title.replace(/^[\p{Emoji}\s]+/u, "").trim() || guildName, "🛍️");
 
-    const stockLine =
-      outOfStock === 0
-        ? `✅ All ${catProducts.length} in stock`
-        : `✅ ${inStock} in stock  •  ❌ ${outOfStock} sold out`;
+  const openRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder()
+      .setCustomId(`pubshop_open_${guildId}`)
+      .setLabel("🛍️  Browse & Order")
+      .setStyle(ButtonStyle.Primary)
+  );
 
-    embed.addFields({
-      name: `${cat.emoji}  ${cat.name}`,
-      value: stockLine,
-      inline: true,
-    });
-  }
-
-  const rows: ActionRowBuilder<ButtonBuilder>[] = [];
-  const chunks = chunkArray(uniqueCats, 5);
-
-  for (const chunk of chunks) {
-    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-      chunk.map((cat) =>
-        new ButtonBuilder()
-          .setCustomId(`postshop_cat_${guildId}_${cat.name}`)
-          .setLabel(cat.name)
-          .setEmoji(cat.emoji)
-          .setStyle(ButtonStyle.Primary)
-      )
-    );
-    rows.push(row);
-  }
-
-  await (channel as any).send({ embeds: [embed], components: rows });
+  await (channel as any).send({
+    embeds: [headerEmbed, productEmbed],
+    components: [openRow],
+  });
 
   await interaction.reply({
-    content: `✅ Shop posted to <#${channelId}>!`,
+    content: `✅ Shop posted to <#${channelId}>! Products are visible immediately — users click **🛍️ Browse & Order** to get their own private session to navigate and order.`,
     ephemeral: true,
   });
-}
-
-function chunkArray<T>(arr: T[], size: number): T[][] {
-  const result: T[][] = [];
-  for (let i = 0; i < arr.length; i += size) {
-    result.push(arr.slice(i, i + size));
-  }
-  return result;
 }
