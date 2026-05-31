@@ -79,14 +79,29 @@ client.on(Events.InteractionCreate, async (interaction) => {
     if (!interaction.isButton()) return;
     const id = interaction.customId;
 
-    // ── Public shop "Browse & Order" button ────────────────────────────────────
-    // Posted by /postshop — visible to everyone. Each user gets their own
-    // independent ephemeral session so navigation never affects other users.
-    if (id.startsWith("pubshop_open_")) {
-      const guildId = id.replace("pubshop_open_", "");
-      const guildName = interaction.guild?.name ?? "Shop";
+    // ── Public shop buttons (posted by /postshop) ─────────────────────────────
+    // The public panel is static — clicking any button gives the user their own
+    // private ephemeral session so nobody's navigation affects anyone else.
+    if (id.startsWith("pubshop_nav_") || id.startsWith("pubshop_order_")) {
+      const isNav = id.startsWith("pubshop_nav_");
 
+      // pubshop_nav_GUILDID_PAGE  or  pubshop_order_GUILDID
+      const withoutPrefix = id.replace(/^pubshop_(nav|order)_/, "");
+      let guildId: string;
+      let startPage = 0;
+
+      if (isNav) {
+        const lastUnderscore = withoutPrefix.lastIndexOf("_");
+        guildId = withoutPrefix.slice(0, lastUnderscore);
+        startPage = parseInt(withoutPrefix.slice(lastUnderscore + 1), 10) || 0;
+      } else {
+        guildId = withoutPrefix;
+        startPage = 0;
+      }
+
+      const guildName = interaction.guild?.name ?? "Shop";
       const allProducts = getProducts(guildId);
+
       if (allProducts.length === 0) {
         await interaction.reply({
           content: "🛍️ The shop is empty right now. Check back soon!",
@@ -96,11 +111,12 @@ client.on(Events.InteractionCreate, async (interaction) => {
       }
 
       const totalPages = Math.max(1, Math.ceil(allProducts.length / 4));
-      const pageProds = allProducts.slice(0, 4);
+      const page = Math.min(startPage, totalPages - 1);
+      const pageProds = allProducts.slice(page * 4, (page + 1) * 4);
 
       const reply = await interaction.reply({
-        embeds: [buildShopEmbed(allProducts, 0, totalPages, guildName, "🛍️")],
-        components: buildComponents(pageProds, 0, totalPages, null),
+        embeds: [buildShopEmbed(allProducts, page, totalPages, guildName, "🛍️")],
+        components: buildComponents(pageProds, page, totalPages, null),
         flags: MessageFlags.Ephemeral,
         fetchReply: true,
       });
