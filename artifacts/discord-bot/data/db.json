@@ -10,6 +10,26 @@
         "stock": "unlimited",
         "id": "1780190739372",
         "addedAt": 1780190739372
+      },
+      {
+        "name": "Steam",
+        "emoji": "🛒",
+        "category": "game",
+        "price": "$5.00",
+        "description": "Game on steam",
+        "stock": "unlimited",
+        "id": "1780192435188",
+        "addedAt": 1780192435188
+      },
+      {
+        "name": "game2",
+        "emoji": "🛒",
+        "category": "game",
+        "price": "5.00",
+        "description": "nun",
+        "stock": "unlimited",
+        "id": "1780192503175",
+        "addedAt": 1780192503175
       }
     ]
   },
@@ -19,6 +39,11 @@
         "name": "test",
         "emoji": "📦",
         "id": "1780190679287"
+      },
+      {
+        "name": "game",
+        "emoji": "<:Twitch:1506828797213802586>",
+        "id": "1780192406943"
       }
     ]
   },

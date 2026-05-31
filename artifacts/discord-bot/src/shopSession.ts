@@ -31,9 +31,7 @@ export function buildShopEmbed(
   const embed = new EmbedBuilder()
     .setColor(0x5865f2)
     .setTitle(`${displayEmoji}  ${displayName}`)
-    .setDescription(
-      `> Browse our products below.\n> Select an item then press **🛒 Order** to purchase.\n\u200b`
-    )
+    .setDescription(`Select an item then press **🛒 Order** to purchase.`)
     .setFooter({
       text: `Page ${page + 1} of ${totalPages} • ${products.length} product${products.length !== 1 ? "s" : ""}`,
     })
@@ -55,8 +53,8 @@ export function buildShopEmbed(
         : `✅ ${product.stock} in stock`;
 
     embed.addFields({
-      name: `${product.emoji}  ${product.name}  ·  \`${product.category}\``,
-      value: `${product.description}\n\n💰 **Price:** \`${product.price}\`   ${stockDisplay}\n\u200b`,
+      name: `${product.emoji} ${product.name}`,
+      value: `${product.description}\n💰 \`${product.price}\` · ${stockDisplay}`,
       inline: false,
     });
   }
