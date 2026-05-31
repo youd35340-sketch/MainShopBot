@@ -23,23 +23,66 @@ export const data = new SlashCommandBuilder()
   .addStringOption((o) =>
     o
       .setName("title")
-      .setDescription("Custom title for the shop embed (default: 🛍️ Shop)")
+      .setDescription("Shop title shown at the top (default: 🛍️ Welcome to the Shop)")
       .setRequired(false)
   )
   .addStringOption((o) =>
     o
       .setName("description")
-      .setDescription("Custom description shown at the top of the shop")
+      .setDescription("Description shown under the title")
+      .setRequired(false)
+  )
+  .addStringOption((o) =>
+    o
+      .setName("color")
+      .setDescription("Embed border color as a hex code (e.g. #5865F2 or FF0000)")
+      .setRequired(false)
+  )
+  .addStringOption((o) =>
+    o
+      .setName("thumbnail")
+      .setDescription("Image URL shown in the top-right corner of the embed (e.g. your logo)")
+      .setRequired(false)
+  )
+  .addStringOption((o) =>
+    o
+      .setName("banner")
+      .setDescription("Image URL shown as a large banner at the bottom of the embed")
+      .setRequired(false)
+  )
+  .addStringOption((o) =>
+    o
+      .setName("footer")
+      .setDescription("Custom footer text (default: 'Click a category below to start browsing')")
       .setRequired(false)
   );
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   const guildId = interaction.guildId!;
-  const channelId = interaction.options.getString("channelid", true).trim().replace(/[<#>]/g, "");
-  const title = interaction.options.getString("title") ?? "🛍️  Welcome to the Shop";
+  const guildName = interaction.guild?.name ?? "Shop";
+  const channelId = interaction.options
+    .getString("channelid", true)
+    .trim()
+    .replace(/[<#>]/g, "");
+
+  const title =
+    interaction.options.getString("title") ?? `🛍️  Welcome to ${guildName}`;
   const description =
     interaction.options.getString("description") ??
-    "Browse our products below. Click a category to see what's available and place your order.";
+    "We offer a variety of products and services at the best prices.\nBrowse our categories below and click **Order** to make a purchase!";
+  const colorRaw = interaction.options.getString("color");
+  const thumbnail = interaction.options.getString("thumbnail");
+  const banner = interaction.options.getString("banner");
+  const footerText =
+    interaction.options.getString("footer") ??
+    "⬇️  Select a category to browse products and place your order";
+
+  let color: number = 0x5865f2;
+  if (colorRaw) {
+    const hex = colorRaw.replace(/^#/, "");
+    const parsed = parseInt(hex, 16);
+    if (!isNaN(parsed)) color = parsed;
+  }
 
   const channel = interaction.guild?.channels.cache.get(channelId);
   if (!channel || !channel.isTextBased()) {
@@ -55,38 +98,66 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (allProducts.length === 0) {
     await interaction.reply({
-      content: "❌ The shop has no products yet. Add some with `/addproduct` first.",
+      content:
+        "❌ The shop has no products yet. Add some with `/addproduct` first.",
       ephemeral: true,
     });
     return;
   }
 
-  const uniqueCats = categories.length > 0
-    ? categories
-    : [...new Set(allProducts.map((p) => p.category))].map((name) => ({
-        id: name,
-        name,
-        emoji: "📦",
-      }));
+  const uniqueCats =
+    categories.length > 0
+      ? categories
+      : [...new Set(allProducts.map((p) => p.category))].map((name) => ({
+          id: name,
+          name,
+          emoji: "📦",
+        }));
+
+  const totalInStock = allProducts.filter(
+    (p) =>
+      p.stock === "unlimited" ||
+      (typeof p.stock === "number" && p.stock > 0)
+  ).length;
+  const totalProducts = allProducts.length;
 
   const embed = new EmbedBuilder()
-    .setColor(0x5865f2)
+    .setColor(color)
     .setTitle(title)
-    .setDescription(`${description}\n\u200b`)
-    .setTimestamp()
-    .setFooter({ text: "Click a category below to start browsing" });
+    .setDescription(
+      [
+        description,
+        "",
+        `> 📦 **${totalProducts}** product${totalProducts !== 1 ? "s" : ""} available  •  ✅ **${totalInStock}** in stock  •  🗂️ **${uniqueCats.length}** categor${uniqueCats.length !== 1 ? "ies" : "y"}`,
+        "",
+        "─────────────────────────────",
+      ].join("\n")
+    )
+    .setFooter({ text: footerText })
+    .setTimestamp();
+
+  if (thumbnail) embed.setThumbnail(thumbnail);
+  if (banner) embed.setImage(banner);
 
   for (const cat of uniqueCats) {
     const catProducts = allProducts.filter(
       (p) => p.category.toLowerCase() === cat.name.toLowerCase()
     );
     const inStock = catProducts.filter(
-      (p) => p.stock === "unlimited" || (typeof p.stock === "number" && p.stock > 0)
+      (p) =>
+        p.stock === "unlimited" ||
+        (typeof p.stock === "number" && p.stock > 0)
     ).length;
+    const outOfStock = catProducts.length - inStock;
+
+    const stockLine =
+      outOfStock === 0
+        ? `✅ All ${catProducts.length} in stock`
+        : `✅ ${inStock} in stock  •  ❌ ${outOfStock} sold out`;
 
     embed.addFields({
       name: `${cat.emoji}  ${cat.name}`,
-      value: `\`${catProducts.length}\` product${catProducts.length !== 1 ? "s" : ""} • \`${inStock}\` in stock`,
+      value: stockLine,
       inline: true,
     });
   }
@@ -110,7 +181,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   await (channel as any).send({ embeds: [embed], components: rows });
 
   await interaction.reply({
-    content: `✅ Shop posted to <#${channelId}>! Anyone in the server can now browse and order.`,
+    content: `✅ Shop posted to <#${channelId}>!`,
     ephemeral: true,
   });
 }
