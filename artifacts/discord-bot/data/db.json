@@ -2,48 +2,278 @@
   "products": {
     "1505065564643659876": [
       {
-        "name": "test",
-        "emoji": "<:SocialBoost:1508506022619250780>",
-        "category": "test",
-        "price": "$100.00",
-        "description": "a test",
+        "name": "Instagram Followers",
+        "emoji": "<:IG:1506828678670319686>",
+        "category": "Social Boosts",
+        "price": "$2.00",
+        "description": "$2.00 Per 1k",
         "stock": "unlimited",
-        "id": "1780190739372",
-        "addedAt": 1780190739372
+        "id": "1780193201363",
+        "addedAt": 1780193201363
       },
       {
-        "name": "Steam",
-        "emoji": "🛒",
-        "category": "game",
-        "price": "$5.00",
-        "description": "Game on steam",
+        "name": "Instagram Likes",
+        "emoji": "<:IG:1506828678670319686>",
+        "category": "Social Boosts",
+        "price": "$1.50",
+        "description": "$1.50 Per 1k",
         "stock": "unlimited",
-        "id": "1780192435188",
-        "addedAt": 1780192435188
+        "id": "1780193268396",
+        "addedAt": 1780193268396
       },
       {
-        "name": "game2",
-        "emoji": "🛒",
-        "category": "game",
-        "price": "5.00",
-        "description": "nun",
+        "name": "TikTok Followers",
+        "emoji": "<:Tiktok:1506828768793198706>",
+        "category": "Social Boosts",
+        "price": "$4.00",
+        "description": "$4.00 Per 1k",
         "stock": "unlimited",
-        "id": "1780192503175",
-        "addedAt": 1780192503175
+        "id": "1780193336976",
+        "addedAt": 1780193336976
+      },
+      {
+        "name": "TikTok Likes",
+        "emoji": "<:Tiktok:1506828768793198706>",
+        "category": "Social Boosts",
+        "price": "$3.00",
+        "description": "$3.00 Per 1k",
+        "stock": "unlimited",
+        "id": "1780193386663",
+        "addedAt": 1780193386663
+      },
+      {
+        "name": "TikTok Views",
+        "emoji": "<:Tiktok:1506828768793198706>",
+        "category": "Social Boosts",
+        "price": "$2.00",
+        "description": "$2.00 Per 1k",
+        "stock": "unlimited",
+        "id": "1780193508611",
+        "addedAt": 1780193508611
+      },
+      {
+        "name": "TikTok Views",
+        "emoji": "<:Tiktok:1506828768793198706>",
+        "category": "Social Boosts",
+        "price": "$2.00",
+        "description": "$2.00 Per 1k",
+        "stock": "unlimited",
+        "id": "1780193508614",
+        "addedAt": 1780193508614
+      },
+      {
+        "name": "Kick Followers",
+        "emoji": "<:Kick:1506828737386385508>",
+        "category": "Social Boosts",
+        "price": "$10.00",
+        "description": "$10.00 Per 1k",
+        "stock": "unlimited",
+        "id": "1780193572154",
+        "addedAt": 1780193572154
+      },
+      {
+        "name": "Kick Followers",
+        "emoji": "<:Kick:1506828737386385508>",
+        "category": "Social Boosts",
+        "price": "$10.00",
+        "description": "$10.00 Per 1k",
+        "stock": "unlimited",
+        "id": "1780193572158",
+        "addedAt": 1780193572158
+      },
+      {
+        "name": "Kick Live Views (15Mins)",
+        "emoji": "<:Kick:1506828737386385508>",
+        "category": "Social Boosts",
+        "price": "$3.00",
+        "description": "$3.00 Per 100",
+        "stock": "unlimited",
+        "id": "1780193649852",
+        "addedAt": 1780193649852
+      },
+      {
+        "name": "Kick Live Views (15Mins)",
+        "emoji": "<:Kick:1506828737386385508>",
+        "category": "Social Boosts",
+        "price": "$3.00",
+        "description": "$3.00 Per 100",
+        "stock": "unlimited",
+        "id": "1780193649870",
+        "addedAt": 1780193649870
+      },
+      {
+        "name": "Kick Live Views (30Mins)",
+        "emoji": "<:Kick:1506828737386385508>",
+        "category": "Social Boosts",
+        "price": "$3.75",
+        "description": "$3.75 Per 100",
+        "stock": "unlimited",
+        "id": "1780193699516",
+        "addedAt": 1780193699516
+      },
+      {
+        "name": "Kick Live Views (30Mins)",
+        "emoji": "<:Kick:1506828737386385508>",
+        "category": "Social Boosts",
+        "price": "$3.75",
+        "description": "$3.75 Per 100",
+        "stock": "unlimited",
+        "id": "1780193699521",
+        "addedAt": 1780193699521
+      },
+      {
+        "name": "Kick Live Views (60Mins)",
+        "emoji": "<:Kick:1506828737386385508>",
+        "category": "Social Boosts",
+        "price": "$4.00",
+        "description": "$4.00 Per 100",
+        "stock": "unlimited",
+        "id": "1780193728322",
+        "addedAt": 1780193728322
+      },
+      {
+        "name": "Kick Live Views (60Mins)",
+        "emoji": "<:Kick:1506828737386385508>",
+        "category": "Social Boosts",
+        "price": "$4.00",
+        "description": "$4.00 Per 100",
+        "stock": "unlimited",
+        "id": "1780193728329",
+        "addedAt": 1780193728329
+      },
+      {
+        "name": "Twitch Followers",
+        "emoji": "<:Twitch:1506828797213802586>",
+        "category": "Social Boosts",
+        "price": "$3.50",
+        "description": "$3.50 Per 1k",
+        "stock": "unlimited",
+        "id": "1780193790219",
+        "addedAt": 1780193790219
+      },
+      {
+        "name": "Twitch Followers",
+        "emoji": "<:Twitch:1506828797213802586>",
+        "category": "Social Boosts",
+        "price": "$3.50",
+        "description": "$3.50 Per 1k",
+        "stock": "unlimited",
+        "id": "1780193790225",
+        "addedAt": 1780193790225
+      },
+      {
+        "name": "Twitch Live Views (15Mins)",
+        "emoji": "<:Twitch:1506828797213802586>",
+        "category": "Social Boosts",
+        "price": "$1.50",
+        "description": "$1.50 Per 100",
+        "stock": "unlimited",
+        "id": "1780193864280",
+        "addedAt": 1780193864280
+      },
+      {
+        "name": "Twitch Live Views (15Mins)",
+        "emoji": "<:Twitch:1506828797213802586>",
+        "category": "Social Boosts",
+        "price": "$1.50",
+        "description": "$1.50 Per 100",
+        "stock": "unlimited",
+        "id": "1780193864283",
+        "addedAt": 1780193864283
+      },
+      {
+        "name": "Twitch Live Views (30Mins)",
+        "emoji": "<:Twitch:1506828797213802586>",
+        "category": "Social Boosts",
+        "price": "$2.50",
+        "description": "$2.50 Per 100",
+        "stock": "unlimited",
+        "id": "1780193898745",
+        "addedAt": 1780193898745
+      },
+      {
+        "name": "Twitch Live Views (30Mins)",
+        "emoji": "<:Twitch:1506828797213802586>",
+        "category": "Social Boosts",
+        "price": "$2.50",
+        "description": "$2.50 Per 100",
+        "stock": "unlimited",
+        "id": "1780193898747",
+        "addedAt": 1780193898747
+      },
+      {
+        "name": "Twitch Live Views (60Mins)",
+        "emoji": "<:Twitch:1506828797213802586>",
+        "category": "Social Boosts",
+        "price": "$3.50",
+        "description": "$3.50 Per 100",
+        "stock": "unlimited",
+        "id": "1780193954873",
+        "addedAt": 1780193954873
+      },
+      {
+        "name": "Twitch Live Views (60Mins)",
+        "emoji": "<:Twitch:1506828797213802586>",
+        "category": "Social Boosts",
+        "price": "$3.50",
+        "description": "$3.50 Per 100",
+        "stock": "unlimited",
+        "id": "1780193954876",
+        "addedAt": 1780193954876
+      },
+      {
+        "name": "Twitch Live Views (120Mins)",
+        "emoji": "<:Twitch:1506828797213802586>",
+        "category": "Social Boosts",
+        "price": "$6.00",
+        "description": "$6.00 Per 100",
+        "stock": "unlimited",
+        "id": "1780194003640",
+        "addedAt": 1780194003640
+      },
+      {
+        "name": "Twitch Live Views (120Mins)",
+        "emoji": "<:Twitch:1506828797213802586>",
+        "category": "Social Boosts",
+        "price": "$6.00",
+        "description": "$6.00 Per 100",
+        "stock": "unlimited",
+        "id": "1780194003644",
+        "addedAt": 1780194003644
+      },
+      {
+        "name": "Twitch Vod Views",
+        "emoji": "<:Twitch:1506828797213802586>",
+        "category": "Social Boosts",
+        "price": "$3.50",
+        "description": "$3.50 Per 100",
+        "stock": "unlimited",
+        "id": "1780194065401",
+        "addedAt": 1780194065401
+      },
+      {
+        "name": "Twitch Vod Views",
+        "emoji": "<:Twitch:1506828797213802586>",
+        "category": "Social Boosts",
+        "price": "$3.50",
+        "description": "$3.50 Per 100",
+        "stock": "unlimited",
+        "id": "1780194065403",
+        "addedAt": 1780194065403
       }
     ]
   },
   "categories": {
     "1505065564643659876": [
       {
-        "name": "test",
-        "emoji": "📦",
-        "id": "1780190679287"
-      },
-      {
         "name": "game",
         "emoji": "<:Twitch:1506828797213802586>",
         "id": "1780192406943"
+      },
+      {
+        "name": "Social Boosts",
+        "emoji": "<:SocialBoost:1508506022619250780>",
+        "id": "1780193171306"
       }
     ]
   },
