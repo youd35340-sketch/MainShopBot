@@ -6,7 +6,7 @@ import {
   ButtonBuilder,
   ButtonStyle,
 } from "discord.js";
-import { getProducts, getConfig } from "../database.js";
+import { getProducts, getConfig, savePostedPanel } from "../database.js";
 import { buildShopEmbed } from "../shopSession.js";
 
 const PRODUCTS_PER_PAGE = 8;
@@ -73,13 +73,15 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(...buttons);
 
-  await (channel as any).send({
+  const sent = await (channel as any).send({
     embeds: [embed],
     components: [row],
   });
 
+  savePostedPanel(guildId, { channelId, messageId: sent.id });
+
   await interaction.reply({
-    content: `✅ Shop panel posted to <#${channelId}>!`,
+    content: `✅ Shop panel posted to <#${channelId}>! It will update automatically whenever you run \`/discount\`.`,
     ephemeral: true,
   });
 }

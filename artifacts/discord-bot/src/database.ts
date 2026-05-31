@@ -22,11 +22,36 @@ export interface Category {
   emoji: string;
 }
 
+export interface PostedPanel {
+  channelId: string;
+  messageId: string;
+}
+
 export interface GuildConfig {
   ticketCategoryId?: string;
   staffRoleId?: string;
   welcomeMessage?: string;
   discountPercent?: number;
+  postedPanels?: PostedPanel[];
+}
+
+export function savePostedPanel(guildId: string, panel: PostedPanel): void {
+  const db = loadDB();
+  if (!db.config[guildId]) db.config[guildId] = {};
+  const panels = db.config[guildId].postedPanels ?? [];
+  panels.push(panel);
+  db.config[guildId].postedPanels = panels;
+  saveDB(db);
+}
+
+export function clearDeadPanels(guildId: string, deadMessageIds: string[]): void {
+  if (deadMessageIds.length === 0) return;
+  const db = loadDB();
+  if (!db.config[guildId]) return;
+  db.config[guildId].postedPanels = (db.config[guildId].postedPanels ?? []).filter(
+    (p) => !deadMessageIds.includes(p.messageId)
+  );
+  saveDB(db);
 }
 
 interface Database {
