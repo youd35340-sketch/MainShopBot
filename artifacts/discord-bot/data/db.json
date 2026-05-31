@@ -1,0 +1,26 @@
+{
+  "products": {
+    "1505065564643659876": [
+      {
+        "name": "test",
+        "emoji": "<:SocialBoost:1508506022619250780>",
+        "category": "test",
+        "price": "$100.00",
+        "description": "a test",
+        "stock": "unlimited",
+        "id": "1780190739372",
+        "addedAt": 1780190739372
+      }
+    ]
+  },
+  "categories": {
+    "1505065564643659876": [
+      {
+        "name": "test",
+        "emoji": "📦",
+        "id": "1780190679287"
+      }
+    ]
+  },
+  "config": {}
+}
