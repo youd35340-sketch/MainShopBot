@@ -1,0 +1,21 @@
+{
+  "name": "@workspace/discord-bot",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --enable-source-maps dist/index.js",
+    "build": "tsc",
+    "deploy": "node --enable-source-maps dist/deploy-commands.js",
+    "start": "npm run build && npm run dev"
+  },
+  "dependencies": {
+    "discord.js": "^14.16.3",
+    "@discordjs/rest": "^2.4.3",
+    "discord-api-types": "^0.37.119"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "~5.9.3"
+  }
+}
