@@ -22,6 +22,7 @@ import * as postshop from "./commands/postshop.js";
 import * as setstock from "./commands/setstock.js";
 import * as stockcheck from "./commands/stockcheck.js";
 import * as announce from "./commands/announce.js";
+import * as discount from "./commands/discount.js";
 import { buildShopEmbed, buildComponents, runShopSession } from "./shopSession.js";
 import { getProducts, getCategories, getConfig } from "./database.js";
 
@@ -46,7 +47,7 @@ const commands: Command[] = [
   addproduct, removeproduct, editproduct,
   addcategory, removecategory, setticket,
   shop, listproducts, postshop,
-  setstock, stockcheck, announce,
+  setstock, stockcheck, announce, discount,
 ];
 
 const commandMap = new Collection<string, Command>();
@@ -114,9 +115,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
       const totalPages = Math.max(1, Math.ceil(allProducts.length / 4));
       const page = Math.min(startPage, totalPages - 1);
       const pageProds = allProducts.slice(page * 4, (page + 1) * 4);
+      const discount = getConfig(guildId).discountPercent;
 
       const reply = await interaction.reply({
-        embeds: [buildShopEmbed(allProducts, page, totalPages, guildName, "🛍️")],
+        embeds: [buildShopEmbed(allProducts, page, totalPages, guildName, "🛍️", discount)],
         components: buildComponents(pageProds, page, totalPages, null),
         flags: MessageFlags.Ephemeral,
         fetchReply: true,

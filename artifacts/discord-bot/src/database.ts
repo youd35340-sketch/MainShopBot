@@ -26,6 +26,7 @@ export interface GuildConfig {
   ticketCategoryId?: string;
   staffRoleId?: string;
   welcomeMessage?: string;
+  discountPercent?: number;
 }
 
 interface Database {

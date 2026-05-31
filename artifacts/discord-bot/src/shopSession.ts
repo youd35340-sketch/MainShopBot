@@ -18,22 +18,32 @@ import { getConfig, Product } from "./database.js";
 
 const PRODUCTS_PER_PAGE = 8;
 
+function applyDiscount(priceStr: string, percent: number): string | null {
+  const num = parseFloat(priceStr.replace(/[^0-9.]/g, ""));
+  if (isNaN(num)) return null;
+  const discounted = (num * (1 - percent / 100)).toFixed(2);
+  const symbol = priceStr.replace(/[0-9.,\s]/g, "").trim() || "$";
+  return `${symbol}${discounted}`;
+}
+
 export function buildShopEmbed(
   products: Product[],
   page: number,
   totalPages: number,
   displayName: string,
-  displayEmoji: string
+  displayEmoji: string,
+  discountPercent?: number
 ): EmbedBuilder {
   const start = page * PRODUCTS_PER_PAGE;
   const pageProducts = products.slice(start, start + PRODUCTS_PER_PAGE);
+  const saleActive = discountPercent && discountPercent > 0;
 
   const embed = new EmbedBuilder()
-    .setColor(0x5865f2)
-    .setTitle(`${displayEmoji}  ${displayName}`)
+    .setColor(saleActive ? 0xe67e22 : 0x5865f2)
+    .setTitle(`${saleActive ? "🔥" : displayEmoji}  ${displayName}${saleActive ? `  —  ${discountPercent}% OFF SALE` : ""}`)
     .setDescription(`Select an item then press **🛒 Order** to purchase.`)
     .setFooter({
-      text: `Page ${page + 1} of ${totalPages} • ${products.length} product${products.length !== 1 ? "s" : ""}`,
+      text: `Page ${page + 1} of ${totalPages} • ${products.length} product${products.length !== 1 ? "s" : ""}${saleActive ? ` • 🏷️ ${discountPercent}% discount active` : ""}`,
     })
     .setTimestamp();
 
@@ -52,9 +62,19 @@ export function buildShopEmbed(
         ? `⚠️ Only ${product.stock} left`
         : `✅ ${product.stock} in stock`;
 
+    let priceDisplay: string;
+    if (saleActive) {
+      const discountedPrice = applyDiscount(product.price, discountPercent!);
+      priceDisplay = discountedPrice
+        ? `~~\`${product.price}\`~~ → \`${discountedPrice}\` 🏷️`
+        : `\`${product.price}\``;
+    } else {
+      priceDisplay = `\`${product.price}\``;
+    }
+
     embed.addFields({
       name: `${product.emoji} ${product.name}`,
-      value: `${product.description}\n💰 \`${product.price}\` · ${stockDisplay}`,
+      value: `${product.description}\n💰 ${priceDisplay} · ${stockDisplay}`,
       inline: false,
     });
   }
@@ -144,6 +164,7 @@ export async function runShopSession(
 ) {
   let page = 0;
   let selectedProductId: string | null = null;
+  const discount = getConfig(guildId).discountPercent;
   const totalPages = Math.max(1, Math.ceil(products.length / PRODUCTS_PER_PAGE));
   const getPageProducts = (p: number) =>
     products.slice(p * PRODUCTS_PER_PAGE, (p + 1) * PRODUCTS_PER_PAGE);
@@ -163,7 +184,7 @@ export async function runShopSession(
       selectedProductId = i.values[0];
       const pageProds = getPageProducts(page);
       await i.update({
-        embeds: [buildShopEmbed(products, page, totalPages, displayName, displayEmoji)],
+        embeds: [buildShopEmbed(products, page, totalPages, displayName, displayEmoji, discount)],
         components: buildComponents(pageProds, page, totalPages, selectedProductId),
       });
       return;
@@ -177,7 +198,7 @@ export async function runShopSession(
         selectedProductId = null;
         const pageProds = getPageProducts(page);
         await i.update({
-          embeds: [buildShopEmbed(products, page, totalPages, displayName, displayEmoji)],
+          embeds: [buildShopEmbed(products, page, totalPages, displayName, displayEmoji, discount)],
           components: buildComponents(pageProds, page, totalPages, selectedProductId),
         });
         return;
@@ -188,7 +209,7 @@ export async function runShopSession(
         selectedProductId = null;
         const pageProds = getPageProducts(page);
         await i.update({
-          embeds: [buildShopEmbed(products, page, totalPages, displayName, displayEmoji)],
+          embeds: [buildShopEmbed(products, page, totalPages, displayName, displayEmoji, discount)],
           components: buildComponents(pageProds, page, totalPages, selectedProductId),
         });
         return;
@@ -330,7 +351,7 @@ export async function runShopSession(
         return row;
       });
       await updateFn({
-        embeds: [buildShopEmbed(products, page, totalPages, displayName, displayEmoji)],
+        embeds: [buildShopEmbed(products, page, totalPages, displayName, displayEmoji, discount)],
         components: disabled,
       });
     } catch {}

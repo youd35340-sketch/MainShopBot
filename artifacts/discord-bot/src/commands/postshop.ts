@@ -6,10 +6,10 @@ import {
   ButtonBuilder,
   ButtonStyle,
 } from "discord.js";
-import { getProducts } from "../database.js";
+import { getProducts, getConfig } from "../database.js";
 import { buildShopEmbed } from "../shopSession.js";
 
-const PRODUCTS_PER_PAGE = 4;
+const PRODUCTS_PER_PAGE = 8;
 
 export const data = new SlashCommandBuilder()
   .setName("postshop")
@@ -49,8 +49,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 
   const totalPages = Math.max(1, Math.ceil(allProducts.length / PRODUCTS_PER_PAGE));
+  const discount = getConfig(guildId).discountPercent;
 
-  const embed = buildShopEmbed(allProducts, 0, totalPages, guildName, "🛍️");
+  const embed = buildShopEmbed(allProducts, 0, totalPages, guildName, "🛍️", discount);
 
   const buttons: ButtonBuilder[] = [];
 
