@@ -11,6 +11,9 @@ import {
   MessageFlags,
   InteractionResponse,
   Message,
+  ChannelType,
+  PermissionFlagsBits,
+  OverwriteType,
 } from "discord.js";
 import { getProducts, getCategories, getConfig, Product } from "./database.js";
 
@@ -221,56 +224,112 @@ export async function runShopSession(
         }
 
         const config = getConfig(guildId);
-        if (!config.ticketChannelId) {
+
+        if (!config.ticketCategoryId || !config.staffRoleId) {
           await i.reply({
-            content: "❌ No ticket channel configured. Ask an admin to run `/setticket`.",
+            content:
+              "❌ The ticket system isn't set up yet. Ask an admin to run `/setticket`.",
             ephemeral: true,
           });
           return;
         }
 
-        const ticketChannel = i.guild?.channels.cache.get(config.ticketChannelId);
-        if (!ticketChannel || !ticketChannel.isTextBased()) {
+        const guild = i.guild!;
+        const category = guild.channels.cache.get(config.ticketCategoryId);
+        if (!category || category.type !== ChannelType.GuildCategory) {
           await i.reply({
-            content: "❌ The configured ticket channel is invalid. Ask an admin to re-run `/setticket`.",
+            content:
+              "❌ The configured ticket category is invalid. Ask an admin to re-run `/setticket`.",
             ephemeral: true,
           });
           return;
         }
 
-        const ticketEmbed = new EmbedBuilder()
-          .setColor(0x5865f2)
-          .setTitle("🎫 New Order Request")
-          .setDescription(
-            `**${i.user}** wants to purchase an item from the shop.\n\nPlease open a ticket to process this order.`
-          )
-          .addFields(
-            { name: "Product", value: `${product.emoji} **${product.name}**`, inline: true },
-            { name: "Category", value: `\`${product.category}\``, inline: true },
-            { name: "Price", value: `\`${product.price}\``, inline: true },
+        await i.deferReply({ ephemeral: true });
+
+        const safeName = i.user.username
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, "")
+          .slice(0, 16) || "user";
+        const channelName = `order-${safeName}`;
+
+        const ticketChannel = await guild.channels.create({
+          name: channelName,
+          type: ChannelType.GuildText,
+          parent: config.ticketCategoryId,
+          permissionOverwrites: [
             {
-              name: "Stock",
+              id: guild.roles.everyone.id,
+              deny: [PermissionFlagsBits.ViewChannel],
+              type: OverwriteType.Role,
+            },
+            {
+              id: i.user.id,
+              allow: [
+                PermissionFlagsBits.ViewChannel,
+                PermissionFlagsBits.SendMessages,
+                PermissionFlagsBits.ReadMessageHistory,
+                PermissionFlagsBits.AttachFiles,
+              ],
+              type: OverwriteType.Member,
+            },
+            {
+              id: config.staffRoleId,
+              allow: [
+                PermissionFlagsBits.ViewChannel,
+                PermissionFlagsBits.SendMessages,
+                PermissionFlagsBits.ReadMessageHistory,
+                PermissionFlagsBits.ManageMessages,
+                PermissionFlagsBits.AttachFiles,
+              ],
+              type: OverwriteType.Role,
+            },
+          ],
+        });
+
+        const welcomeText = (config.welcomeMessage ?? "Hey {user}! 👋 A staff member will be with you shortly for **{product}**.")
+          .replace("{user}", `<@${i.user.id}>`)
+          .replace("{product}", product.name);
+
+        const orderEmbed = new EmbedBuilder()
+          .setColor(0x5865f2)
+          .setTitle("🎫 New Order Ticket")
+          .setDescription(welcomeText)
+          .addFields(
+            { name: "🛒 Product", value: `${product.emoji} **${product.name}**`, inline: true },
+            { name: "🏷️ Category", value: `\`${product.category}\``, inline: true },
+            { name: "💰 Price", value: `\`${product.price}\``, inline: true },
+            {
+              name: "📦 Stock",
               value:
                 product.stock === "unlimited"
                   ? "♾️ Unlimited"
                   : `\`${product.stock}\` remaining`,
               inline: true,
             },
-            { name: "Customer", value: `${i.user} (\`${i.user.tag}\`)`, inline: true }
+            { name: "👤 Customer", value: `<@${i.user.id}> (\`${i.user.tag}\`)`, inline: true },
           )
-          .setFooter({ text: "Use TicketTool to open a purchase ticket for this customer" })
+          .setFooter({ text: "Staff — use the button below to close this ticket when done" })
           .setTimestamp();
 
-        await (ticketChannel as any).send({
-          content: `${i.user} — ${config.ticketMessage ?? "Order Request"}: **${product.name}**`,
-          embeds: [ticketEmbed],
+        const closeRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+          new ButtonBuilder()
+            .setCustomId(`ticket_close_${ticketChannel.id}_${i.user.id}`)
+            .setLabel("🔒 Close Ticket")
+            .setStyle(ButtonStyle.Danger)
+        );
+
+        await ticketChannel.send({
+          content: `<@${i.user.id}> <@&${config.staffRoleId}>`,
+          embeds: [orderEmbed],
+          components: [closeRow],
         });
 
         const confirmEmbed = new EmbedBuilder()
           .setColor(0x57f287)
-          .setTitle("✅ Order Submitted!")
+          .setTitle("✅ Ticket Created!")
           .setDescription(
-            `Your order for **${product.emoji} ${product.name}** has been submitted!\n\nA staff member will open a ticket with you shortly.`
+            `Your order ticket has been opened! Head over to ${ticketChannel} to continue.\n\nA staff member will be with you shortly.`
           )
           .addFields(
             { name: "Product", value: `${product.emoji} **${product.name}**`, inline: true },
@@ -279,7 +338,7 @@ export async function runShopSession(
           .setFooter({ text: "Please be patient while staff processes your order." })
           .setTimestamp();
 
-        await i.reply({ embeds: [confirmEmbed], ephemeral: true });
+        await i.editReply({ embeds: [confirmEmbed] });
         return;
       }
     }

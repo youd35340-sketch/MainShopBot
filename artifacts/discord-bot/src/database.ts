@@ -23,8 +23,9 @@ export interface Category {
 }
 
 export interface GuildConfig {
-  ticketChannelId?: string;
-  ticketMessage?: string;
+  ticketCategoryId?: string;
+  staffRoleId?: string;
+  welcomeMessage?: string;
 }
 
 interface Database {

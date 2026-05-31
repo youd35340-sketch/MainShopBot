@@ -22,5 +22,10 @@
       }
     ]
   },
-  "config": {}
+  "config": {
+    "1505065564643659876": {
+      "ticketChannelId": "1505189216814891248",
+      "ticketMessage": "Order Request"
+    }
+  }
 }

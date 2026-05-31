@@ -6,9 +6,9 @@ import {
   Events,
   REST,
   Routes,
-  ButtonInteraction,
   EmbedBuilder,
   MessageFlags,
+  ChannelType,
 } from "discord.js";
 import * as addproduct from "./commands/addproduct.js";
 import * as removeproduct from "./commands/removeproduct.js";
@@ -26,7 +26,11 @@ import {
   buildComponents,
   runShopSession,
 } from "./shopSession.js";
-import { getProducts, getCategories } from "./database.js";
+import { getProducts, getCategories, getConfig } from "./database.js";
+
+process.on("unhandledRejection", (err) => {
+  console.error("⚠️ Unhandled rejection:", err);
+});
 
 const TOKEN = process.env.DISCORD_TOKEN;
 const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
@@ -81,75 +85,123 @@ client.once(Events.ClientReady, async (c) => {
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
-  if (interaction.isChatInputCommand()) {
-    const command = commandMap.get(interaction.commandName);
-    if (!command) return;
-    try {
+  try {
+    if (interaction.isChatInputCommand()) {
+      const command = commandMap.get(interaction.commandName);
+      if (!command) return;
       await command.execute(interaction);
-    } catch (err) {
-      console.error(`❌ Error in /${interaction.commandName}:`, err);
-      const reply = {
-        content: "❌ Something went wrong while running this command.",
-        ephemeral: true,
-      };
-      if (interaction.replied || interaction.deferred) {
-        await interaction.followUp(reply).catch(() => {});
-      } else {
-        await interaction.reply(reply).catch(() => {});
-      }
-    }
-    return;
-  }
-
-  if (interaction.isButton() && interaction.customId.startsWith("postshop_cat_")) {
-    const parts = interaction.customId.replace("postshop_cat_", "").split("_");
-    const guildId = parts[0];
-    const categoryName = parts.slice(1).join("_");
-
-    const allProducts = getProducts(guildId);
-    const categories = getCategories(guildId);
-    const catInfo = categories.find(
-      (c) => c.name.toLowerCase() === categoryName.toLowerCase()
-    );
-    const categoryEmoji = catInfo?.emoji ?? "🛒";
-    const resolvedName = catInfo?.name ?? categoryName;
-
-    const filteredProducts = allProducts.filter(
-      (p) => p.category.toLowerCase() === categoryName.toLowerCase()
-    );
-
-    if (filteredProducts.length === 0) {
-      await interaction.reply({
-        content: `❌ No products found in **${resolvedName}**. Check back later!`,
-        flags: MessageFlags.Ephemeral,
-      });
       return;
     }
 
-    const totalPages = Math.max(1, Math.ceil(filteredProducts.length / 4));
-    const pageProds = filteredProducts.slice(0, 4);
+    if (interaction.isButton()) {
+      const id = interaction.customId;
 
-    const reply = await interaction.reply({
-      embeds: [buildShopEmbed(filteredProducts, 0, totalPages, resolvedName, categoryEmoji)],
-      components: buildComponents(pageProds, 0, totalPages, null),
-      flags: MessageFlags.Ephemeral,
-      fetchReply: true,
-    });
+      if (id.startsWith("postshop_cat_")) {
+        const parts = id.replace("postshop_cat_", "").split("_");
+        const guildId = parts[0];
+        const categoryName = parts.slice(1).join("_");
 
-    await runShopSession(
-      guildId,
-      interaction.guild?.name ?? "Shop",
-      categoryName,
-      reply,
-      async (data) => {
-        await interaction.editReply(data as any);
-      },
-      async (data) => {
-        await interaction.followUp({ ...data, flags: MessageFlags.Ephemeral } as any);
-      },
-      interaction.user.id,
-      false
-    );
+        const allProducts = getProducts(guildId);
+        const categories = getCategories(guildId);
+        const catInfo = categories.find(
+          (c) => c.name.toLowerCase() === categoryName.toLowerCase()
+        );
+        const categoryEmoji = catInfo?.emoji ?? "🛒";
+        const resolvedName = catInfo?.name ?? categoryName;
+
+        const filteredProducts = allProducts.filter(
+          (p) => p.category.toLowerCase() === categoryName.toLowerCase()
+        );
+
+        if (filteredProducts.length === 0) {
+          await interaction.reply({
+            content: `❌ No products found in **${resolvedName}**. Check back later!`,
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+
+        const totalPages = Math.max(1, Math.ceil(filteredProducts.length / 4));
+        const pageProds = filteredProducts.slice(0, 4);
+
+        const reply = await interaction.reply({
+          embeds: [buildShopEmbed(filteredProducts, 0, totalPages, resolvedName, categoryEmoji)],
+          components: buildComponents(pageProds, 0, totalPages, null),
+          flags: MessageFlags.Ephemeral,
+          fetchReply: true,
+        });
+
+        await runShopSession(
+          guildId,
+          interaction.guild?.name ?? "Shop",
+          categoryName,
+          reply,
+          async (data) => {
+            await interaction.editReply(data as any);
+          },
+          async (data) => {
+            await interaction.followUp({ ...data, flags: MessageFlags.Ephemeral } as any);
+          },
+          interaction.user.id,
+          false
+        );
+        return;
+      }
+
+      if (id.startsWith("ticket_close_")) {
+        const parts = id.replace("ticket_close_", "").split("_");
+        const ticketChannelId = parts[0];
+        const ticketOwnerId = parts[1];
+
+        const guild = interaction.guild;
+        if (!guild) return;
+
+        const config = getConfig(guild.id);
+        const member = await guild.members.fetch(interaction.user.id).catch(() => null);
+        const isStaff = config.staffRoleId
+          ? member?.roles.cache.has(config.staffRoleId)
+          : false;
+        const isOwner = interaction.user.id === ticketOwnerId;
+
+        if (!isStaff && !isOwner) {
+          await interaction.reply({
+            content: "❌ Only staff or the ticket owner can close this ticket.",
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+
+        const closedBy = interaction.user;
+        const closeEmbed = new EmbedBuilder()
+          .setColor(0xed4245)
+          .setTitle("🔒 Ticket Closing")
+          .setDescription(
+            `This ticket was closed by ${closedBy}.\n\n**This channel will be deleted in 5 seconds.**`
+          )
+          .setTimestamp();
+
+        await interaction.reply({ embeds: [closeEmbed] });
+
+        setTimeout(async () => {
+          const channel = guild.channels.cache.get(ticketChannelId);
+          if (channel && channel.type === ChannelType.GuildText) {
+            await channel.delete(`Ticket closed by ${closedBy.tag}`).catch(() => {});
+          }
+        }, 5000);
+        return;
+      }
+    }
+  } catch (err) {
+    console.error("❌ Interaction error:", err);
+    if (
+      interaction.isRepliable() &&
+      !interaction.replied &&
+      !interaction.deferred
+    ) {
+      await interaction
+        .reply({ content: "❌ Something went wrong.", ephemeral: true })
+        .catch(() => {});
+    }
   }
 });
 
