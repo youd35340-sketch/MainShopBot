@@ -1,0 +1,12 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+:root {
+  --app-font-sans: 'Segoe UI', system-ui, sans-serif;
+  --app-font-mono: 'Consolas', monospace;
+}
+
+body {
+  font-family: var(--app-font-sans);
+  -webkit-font-smoothing: antialiased;
+}
