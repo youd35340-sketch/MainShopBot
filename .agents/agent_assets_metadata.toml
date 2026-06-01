@@ -6,3 +6,9 @@ id = "lwaaWIGITtrvSCdImFXYE"
 uri = "file://discord-bot-railway.tar.gz"
 type = "unspecified"
 title = "Discord Bot — Railway Deploy Package"
+
+[[outputs]]
+id = "0Xf8cSu_GLMtrUXo03hxi"
+uri = "file://discord-bot-flyio.tar.gz"
+type = "unspecified"
+title = "Discord Bot — Fly.io Deploy Package"

@@ -1,0 +1,20 @@
+# Fly.io configuration for Vix's Discord Shop Bot
+# This is a WORKER process — it connects outward to Discord.
+# No inbound port or HTTP listener is needed.
+
+app = "vix-shop-bot"
+primary_region = "ord"
+
+[build]
+
+[env]
+  NODE_ENV = "production"
+
+# Persistent volume so your products/config survive redeploys
+[mounts]
+  source = "shop_data"
+  destination = "/app/data"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
