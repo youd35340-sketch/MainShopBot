@@ -25,7 +25,6 @@ import * as announce from "./commands/announce.js";
 import * as discount from "./commands/discount.js";
 import { buildShopEmbed, buildComponents, runShopSession } from "./shopSession.js";
 import { getProducts, getCategories, getConfig } from "./database.js";
-import { startDashboard } from "./dashboard.js";
 
 process.on("unhandledRejection", (err) => {
   console.error("⚠️ Unhandled rejection:", err);
@@ -186,9 +185,5 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
   }
 });
-
-// Start the web dashboard on the assigned PORT
-const PORT = parseInt(process.env.PORT ?? "3000", 10);
-startDashboard(PORT);
 
 client.login(TOKEN);
