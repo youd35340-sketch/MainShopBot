@@ -68,28 +68,8 @@
         "price": "$10.00",
         "description": "$10.00 Per 1k",
         "stock": "unlimited",
-        "id": "1780193572154",
-        "addedAt": 1780193572154
-      },
-      {
-        "name": "Kick Followers",
-        "emoji": "<:Kick:1506828737386385508>",
-        "category": "Social Boosts",
-        "price": "$10.00",
-        "description": "$10.00 Per 1k",
-        "stock": "unlimited",
         "id": "1780193572158",
         "addedAt": 1780193572158
-      },
-      {
-        "name": "Kick Live Views (15Mins)",
-        "emoji": "<:Kick:1506828737386385508>",
-        "category": "Social Boosts",
-        "price": "$3.00",
-        "description": "$3.00 Per 100",
-        "stock": "unlimited",
-        "id": "1780193649852",
-        "addedAt": 1780193649852
       },
       {
         "name": "Kick Live Views (15Mins)",
@@ -108,28 +88,8 @@
         "price": "$3.75",
         "description": "$3.75 Per 100",
         "stock": "unlimited",
-        "id": "1780193699516",
-        "addedAt": 1780193699516
-      },
-      {
-        "name": "Kick Live Views (30Mins)",
-        "emoji": "<:Kick:1506828737386385508>",
-        "category": "Social Boosts",
-        "price": "$3.75",
-        "description": "$3.75 Per 100",
-        "stock": "unlimited",
         "id": "1780193699521",
         "addedAt": 1780193699521
-      },
-      {
-        "name": "Kick Live Views (60Mins)",
-        "emoji": "<:Kick:1506828737386385508>",
-        "category": "Social Boosts",
-        "price": "$4.00",
-        "description": "$4.00 Per 100",
-        "stock": "unlimited",
-        "id": "1780193728322",
-        "addedAt": 1780193728322
       },
       {
         "name": "Kick Live Views (60Mins)",
@@ -148,28 +108,8 @@
         "price": "$3.50",
         "description": "$3.50 Per 1k",
         "stock": "unlimited",
-        "id": "1780193790219",
-        "addedAt": 1780193790219
-      },
-      {
-        "name": "Twitch Followers",
-        "emoji": "<:Twitch:1506828797213802586>",
-        "category": "Social Boosts",
-        "price": "$3.50",
-        "description": "$3.50 Per 1k",
-        "stock": "unlimited",
         "id": "1780193790225",
         "addedAt": 1780193790225
-      },
-      {
-        "name": "Twitch Live Views (15Mins)",
-        "emoji": "<:Twitch:1506828797213802586>",
-        "category": "Social Boosts",
-        "price": "$1.50",
-        "description": "$1.50 Per 100",
-        "stock": "unlimited",
-        "id": "1780193864280",
-        "addedAt": 1780193864280
       },
       {
         "name": "Twitch Live Views (15Mins)",
@@ -188,28 +128,8 @@
         "price": "$2.50",
         "description": "$2.50 Per 100",
         "stock": "unlimited",
-        "id": "1780193898745",
-        "addedAt": 1780193898745
-      },
-      {
-        "name": "Twitch Live Views (30Mins)",
-        "emoji": "<:Twitch:1506828797213802586>",
-        "category": "Social Boosts",
-        "price": "$2.50",
-        "description": "$2.50 Per 100",
-        "stock": "unlimited",
         "id": "1780193898747",
         "addedAt": 1780193898747
-      },
-      {
-        "name": "Twitch Live Views (60Mins)",
-        "emoji": "<:Twitch:1506828797213802586>",
-        "category": "Social Boosts",
-        "price": "$3.50",
-        "description": "$3.50 Per 100",
-        "stock": "unlimited",
-        "id": "1780193954873",
-        "addedAt": 1780193954873
       },
       {
         "name": "Twitch Live Views (60Mins)",
@@ -228,16 +148,6 @@
         "price": "$6.00",
         "description": "$6.00 Per 100",
         "stock": "unlimited",
-        "id": "1780194003640",
-        "addedAt": 1780194003640
-      },
-      {
-        "name": "Twitch Live Views (120Mins)",
-        "emoji": "<:Twitch:1506828797213802586>",
-        "category": "Social Boosts",
-        "price": "$6.00",
-        "description": "$6.00 Per 100",
-        "stock": "unlimited",
         "id": "1780194003644",
         "addedAt": 1780194003644
       },
@@ -248,18 +158,68 @@
         "price": "$3.50",
         "description": "$3.50 Per 100",
         "stock": "unlimited",
-        "id": "1780194065401",
-        "addedAt": 1780194065401
-      },
-      {
-        "name": "Twitch Vod Views",
-        "emoji": "<:Twitch:1506828797213802586>",
-        "category": "Social Boosts",
-        "price": "$3.50",
-        "description": "$3.50 Per 100",
-        "stock": "unlimited",
         "id": "1780194065403",
         "addedAt": 1780194065403
+      },
+      {
+        "name": "Premium Netflix (6months)",
+        "emoji": "<:netflix:1510648118067335308>",
+        "category": "Accounts",
+        "price": "$25.00",
+        "description": "4K Premium Netflix account (6Months)",
+        "stock": 95,
+        "id": "1780237092482",
+        "addedAt": 1780237092482
+      },
+      {
+        "name": "Premium Netflix (1month",
+        "emoji": "<:netflix:1510648118067335308>",
+        "category": "Accounts",
+        "price": "8.50)",
+        "description": "4K Premium Netflix account (1Months)",
+        "stock": 95,
+        "id": "1780237193420",
+        "addedAt": 1780237193420
+      },
+      {
+        "name": "Prime Video (1month)",
+        "emoji": "<:Prime:1510650210810859661>",
+        "category": "Accounts",
+        "price": "$5.50",
+        "description": "1Month of Prime Video",
+        "stock": "unlimited",
+        "id": "1780237533369",
+        "addedAt": 1780237533369
+      },
+      {
+        "name": "Prime Video (12months)",
+        "emoji": "<:Prime:1510650210810859661>",
+        "category": "Accounts",
+        "price": "$55.00",
+        "description": "12Months of Prime Video",
+        "stock": "unlimited",
+        "id": "1780237598050",
+        "addedAt": 1780237598050
+      },
+      {
+        "name": "Disney+ (1month)",
+        "emoji": "<:disnesy:1510651723440455812>",
+        "category": "Accounts",
+        "price": "$10.00",
+        "description": "1Months of Prime Video NO ADS",
+        "stock": "unlimited",
+        "id": "1780237934778",
+        "addedAt": 1780237934778
+      },
+      {
+        "name": "Disney+ (3months)",
+        "emoji": "<:disnesy:1510651723440455812>",
+        "category": "Accounts",
+        "price": "$30.00",
+        "description": "3Months of Prime Video NO ADS",
+        "stock": "unlimited",
+        "id": "1780237988042",
+        "addedAt": 1780237988042
       }
     ]
   },
@@ -274,6 +234,11 @@
         "name": "Social Boosts",
         "emoji": "<:SocialBoost:1508506022619250780>",
         "id": "1780193171306"
+      },
+      {
+        "name": "Accounts",
+        "emoji": "📦",
+        "id": "1780236838731"
       }
     ]
   },
@@ -283,7 +248,21 @@
       "ticketMessage": "Order Request",
       "ticketCategoryId": "1506060809946792067",
       "staffRoleId": "1505067256126898256",
-      "welcomeMessage": "Thanks for Ordering with us! Vix will be with you shortly!!"
+      "welcomeMessage": "Thanks for Ordering with us! Vix will be with you shortly!!",
+      "postedPanels": [
+        {
+          "channelId": "1506064373947437257",
+          "messageId": "1510646317398102146"
+        },
+        {
+          "channelId": "1505189216814891248",
+          "messageId": "1510652601837031494"
+        },
+        {
+          "channelId": "1505189306954944683",
+          "messageId": "1510787166207344972"
+        }
+      ]
     }
   }
 }
